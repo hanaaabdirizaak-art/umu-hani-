@@ -1,51 +1,79 @@
-void main() {
-    Student s = new Student();
-    s.setDetails("Saaid", "101");
-    s.setGpa(3.5);
-    System.out.println(s.studentCard());
 
-    Lecturer l = new Lecturer();
-    l.setDetails("Ahmed", "201");
-    l.setFaculty("Computer Science");
-    System.out.println(l.staffCard());
-}
 
-class Person {
-    protected String name;
-    protected String id;
+abstract class Account {
+    private String accountNumber;
+    protected double balance;
 
-    public void setDetails(String name, String id) {
-        this.name = name;
-        this.id = id;
+    // Constructor-ka Account
+    Account(String accountNumber, double balance) {
+        this.accountNumber = accountNumber;
+        this.balance = balance;
     }
 
-    public String describe() {
-        return name + " (" + id + ")";
+    abstract void withdraw(double amount);
+
+    void deposit(double amount) {
+        if (amount <= 0) refuse("deposit must be more than 0");
+        else balance += amount;
+    }
+
+    void refuse(String why) {
+        System.out.println("" + accountNumber + " refused: " + why);
+    }
+
+    void show() {
+        System.out.println("" + accountNumber + " balance: " + balance);
     }
 }
 
-class Student extends Person {
-    protected double gpa;
 
-    public void setGpa(double gpa) {
-        if (gpa >= 0 && gpa <= 4.0) {
-            this.gpa = gpa;
+class Savings extends Account {
+    Savings(String n, double b) { super(n, b); }
+
+    @Override
+    void withdraw(double amount) {
+        if (balance - amount < 50) refuse("must keep at least 50");
+        else balance -= amount;
+    }
+}
+
+class Current extends Account {
+    Current(String n, double b) { super(n, b); }
+
+    @Override
+    void withdraw(double amount) {
+        if (balance - amount < -200) refuse("overdraft limit is 200");
+        else balance -= amount;
+    }
+}
+
+class Student extends Account {
+    Student(String n, double b) {
+        super(n, b);
+    }
+
+    @Override
+    void withdraw(double amount) {
+        if (amount > 100) {
+            refuse("max 100 per withdrawal");
+        } else if (amount > balance) {
+            refuse("not enough money");
+        } else {
+            balance -= amount;
         }
     }
-
-    public String studentCard() {
-        return "Student " + describe() + ", GPA = " + gpa;
-    }
 }
 
-class Lecturer extends Person {
-    private String faculty;
 
-    public void setFaculty(String faculty) {
-        this.faculty = faculty;
-    }
+class AccountDemo {
+    public static void main(String[] args) {
 
-    public String staffCard() {
-        return "Lecturer " + name + " (" + id + "), " + faculty;
+        Account acc1 = new Savings("SAV-1", 200);
+        Account acc2 = new Current("CUR-1", 200);
+        Account acc3 = new Student("STU-1", 200);
+
+        acc1.deposit(50); acc1.withdraw(300); acc1.show();
+        acc2.deposit(50); acc2.withdraw(300); acc2.show();
+        acc3.deposit(50); acc3.withdraw(300); acc3.show();
     }
 }
